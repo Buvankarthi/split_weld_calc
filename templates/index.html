@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weld Bead Calculator</title>
+    <style>
+        body { font-family: Arial; background: #f3f3f3; padding: 20px; }
+        .container { 
+            width: 550px; margin: auto; background: white; 
+            padding: 25px; border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+        }
+        input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        button { 
+            width: 100%; padding: 10px; background: #1976d2; 
+            color: white; border: none; cursor: pointer; margin-top: 10px;
+        }
+        .results { background: #e8eaf6; padding: 15px; margin-top: 20px; border-radius: 4px; }
+        
+        /* Schematic Styling */
+        .layout-container {
+            margin-top: 40px; /* Increased spacing */
+            overflow-x: auto; 
+            padding: 10px 0;
+        }
+        .layout {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 40px;
+        }
+        .weld {
+            background: #ff7043;
+            height: 30px;
+            border: 1px solid #d84315;
+            box-sizing: border-box;
+        }
+        .gap {
+            background: #cfd8dc;
+            height: 10px;
+            border-top: 1px solid #90a4ae;
+            border-bottom: 1px solid #90a4ae;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Weld Bead Calculator</h2>
+    <p><b>Parameters</b></p>
+    <ul style="font-size: 0.9em;">
+        <li>N – Number of Beads | L – Weld Length</li>
+        <li>G – Gap Between Beads | R – Run Length</li>
+    </ul>
+
+    <form method="POST">
+        <label>N (Beads)</label><input name="N" value="{{ request.form.get('N', '') }}">
+        <label>L (Weld Length)</label><input name="L" value="{{ request.form.get('L', '') }}">
+        <label>G (Gap)</label><input name="G" value="{{ request.form.get('G', '') }}">
+        <label>R (Total Run)</label><input name="R" value="{{ request.form.get('R', '') }}">
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if result %}
+    <div class="results">
+        <h3>Results</h3>
+        <p>N = {{result.N}} | L = {{result.L}} | G = {{result.G}}</p>
+        <p>Pitch (P) = {{result.P}} | Run (R) = {{result.R}}</p>
+        <p><b>Total Weld Material (T) = {{result.T}}</b></p>
+    </div>
+
+    <div class="layout-container">
+        <div class="layout">
+            {% for part in layout %}
+                {% if part.type == "weld" %}
+                    <div class="weld" style="width: {{ part.length * 4 }}px;"></div>
+                {% else %}
+                    <div class="gap" style="width: {{ part.length * 4 }}px;"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

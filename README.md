@@ -1,2 +1,2 @@
-# split_weld_calc
-Just a begineer for Coding
+# Spidey-
+Just a beginner for Coding
