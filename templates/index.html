@@ -1,86 +1,559 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Weld Bead Calculator</title>
+    <title>Split Weld (Intermittent Weld) Calculator</title>
     <style>
-        body { font-family: Arial; background: #f3f3f3; padding: 20px; }
-        .container { 
-            width: 550px; margin: auto; background: white; 
-            padding: 25px; border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
-        button { 
-            width: 100%; padding: 10px; background: #1976d2; 
-            color: white; border: none; cursor: pointer; margin-top: 10px;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 10px;
+            min-height: 100vh;
         }
-        .results { background: #e8eaf6; padding: 15px; margin-top: 20px; border-radius: 4px; }
-        
-        /* Schematic Styling */
-        .layout-container {
-            margin-top: 40px; /* Increased spacing */
-            overflow-x: auto; 
-            padding: 10px 0;
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
         }
-        .layout {
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+            width: 100%;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            width: 100%;
+        }
+
+        /* ===== LEFT COLUMN (FORM) ===== */
+        .form-wrapper {
+            flex: 0 1 45%;
+            min-width: 300px;
+        }
+
+        /* ===== FORM SECTION ===== */
+        .form-section {
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            margin-left: 8px;
+            cursor: help;
+            position: relative;
+        }
+
+        .tooltip-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: normal;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .unit-label {
+            color: #666;
+            font-weight: 500;
+            min-width: 35px;
+        }
+
+        .formula-box {
+            background: #f0f4ff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #555;
+            margin-top: 20px;
+            border-left: 3px solid #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* ===== RIGHT COLUMN (RESULTS) ===== */
+        .results-wrapper {
+            flex: 1 1 50%;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* ===== WARNINGS SECTION ===== */
+        .warnings {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 0;
+        }
+
+        .warnings h3 {
+            color: #ff6f00;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .warning-item {
+            color: #e65100;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .warning-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ===== RESULTS SECTION ===== */
+        .results {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f5f1ff 100%);
+            padding: 18px;
+            margin-top: 0;
+            border-radius: 8px;
+            border-top: 4px solid #667eea;
+        }
+
+        .results h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 1000px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-item label {
+            font-size: 11px;
+            color: #666;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .result-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .result-item .unit {
+            font-size: 11px;
+            color: #999;
+            margin-left: 4px;
+        }
+
+        .highlight-result {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .highlight-result label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 11px;
+        }
+
+        .highlight-result .value {
+            color: #fff;
+            font-size: 22px;
+        }
+
+        /* ===== VISUALIZATION SECTION ===== */
+        .visualization-section {
+            margin-top: 0;
+        }
+
+        .visualization-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .weld-layout-container {
+            background: white;
+            padding: 15px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .weld-layout {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            min-height: 40px;
+            height: 25px;
+            gap: 0;
+            position: relative;
+            width: fit-content;
+            flex-wrap: nowrap;
         }
+
         .weld {
-            background: #ff7043;
-            height: 30px;
-            border: 1px solid #d84315;
+            background: linear-gradient(135deg, #ff7043 0%, #ff5722 100%);
+            height: 25px;
+            border: 2px solid #d84315;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+            font-weight: 600;
+            flex-shrink: 0;
+            position: relative;
+            min-width: 1px;
+            border-radius: 2px;
         }
+
+        .weld:hover::after {
+            content: attr(data-length);
+            position: absolute;
+            bottom: -14px;
+            background: #333;
+            color: white;
+            padding: 2px 3px;
+            border-radius: 2px;
+            font-size: 8px;
+            white-space: nowrap;
+            z-index: 5;
+        }
+
         .gap {
-            background: #cfd8dc;
-            height: 10px;
-            border-top: 1px solid #90a4ae;
-            border-bottom: 1px solid #90a4ae;
+            background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+            height: 5px;
+            border-top: 1px dashed #90a4ae;
+            border-bottom: 1px dashed #90a4ae;
             box-sizing: border-box;
+            flex-shrink: 0;
+            position: relative;
+            min-width: 1px;
+            margin: 10px 0;
+        }
+
+        .gap:hover::after {
+            content: attr(data-length);
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .scale-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .form-wrapper,
+            .results-wrapper {
+                flex: 1 1 100%;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Weld Bead Calculator</h2>
-    <p><b>Parameters</b></p>
-    <ul style="font-size: 0.9em;">
-        <li>N – Number of Beads | L – Weld Length</li>
-        <li>G – Gap Between Beads | R – Run Length</li>
-    </ul>
+    <h1>⚙️ Split Weld (Intermittent Weld) Calculator</h1>
+    <div class="subtitle">Professional weld bead calculator for fabrication engineers</div>
 
-    <form method="POST">
-        <label>N (Beads)</label><input name="N" value="{{ request.form.get('N', '') }}">
-        <label>L (Weld Length)</label><input name="L" value="{{ request.form.get('L', '') }}">
-        <label>G (Gap)</label><input name="G" value="{{ request.form.get('G', '') }}">
-        <label>R (Total Run)</label><input name="R" value="{{ request.form.get('R', '') }}">
-        <button type="submit">Calculate</button>
-    </form>
+    <div class="form-wrapper">
+        <form method="POST">
+            <!-- FORM SECTION -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label>
+                        N – Number of Weld Beads
+                        <span class="tooltip-icon" data-tooltip="Total number of intermittent weld beads">?</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" name="N" placeholder="e.g., 5" value="{{ request.form.get('N', '') }}" step="0.01">
+                        <span class="unit-label">beads</span>
+                    </div>
+                </div>
 
-    {% if result %}
-    <div class="results">
-        <h3>Results</h3>
-        <p>N = {{result.N}} | L = {{result.L}} | G = {{result.G}}</p>
-        <p>Pitch (P) = {{result.P}} | Run (R) = {{result.R}}</p>
-        <p><b>Total Weld Material (T) = {{result.T}}</b></p>
+                <div class="form-group">
+                    <label>
+                        L – Length of Each Weld Bead
+                        <span class="tooltip-icon" data-tooltip="Length of continuous weld in each bead">?</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" name="L" placeholder="e.g., 60" value="{{ request.form.get('L', '') }}" step="0.1">
+                        <span class="unit-label">mm</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        G – Gap Between Weld Beads
+                        <span class="tooltip-icon" data-tooltip="Distance between consecutive welds">?</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" name="G" placeholder="e.g., 40" value="{{ request.form.get('G', '') }}" step="0.1">
+                        <span class="unit-label">mm</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        R – Total Run Length
+                        <span class="tooltip-icon" data-tooltip="Total available weld run or seam length. Leave empty to calculate.">?</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" name="R" placeholder="e.g., 500" value="{{ request.form.get('R', '') }}" step="0.1">
+                        <span class="unit-label">mm</span>
+                    </div>
+                </div>
+
+                <!-- FORMULAS -->
+                <div class="formula-box">
+                    <strong>📐 Formulas:</strong><br>
+                    P = L + G | T = N × L<br>
+                    R = N × L + (N − 1) × G
+                </div>
+
+                <button type="submit">Calculate</button>
+            </div>
+        </form>
     </div>
 
-    <div class="layout-container">
-        <div class="layout">
-            {% for part in layout %}
-                {% if part.type == "weld" %}
-                    <div class="weld" style="width: {{ part.length * 4 }}px;"></div>
-                {% else %}
-                    <div class="gap" style="width: {{ part.length * 4 }}px;"></div>
-                {% endif %}
+    <div class="results-wrapper">
+        <!-- WARNINGS -->
+        {% if warnings %}
+        <div class="warnings">
+            <h3>⚠️ Warnings</h3>
+            {% for warning in warnings %}
+                <div class="warning-item">{{ warning }}</div>
             {% endfor %}
         </div>
+        {% endif %}
+
+        <!-- RESULTS -->
+        {% if result %}
+        <div class="results">
+            <h3>📊 Results</h3>
+            
+            <div class="results-grid">
+                <div class="result-item">
+                    <label>Number of Beads</label>
+                    <div class="value">
+                        {{ result.N if result.N is not none else "—" }}
+                        <span class="unit">beads</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <label>Bead Length</label>
+                    <div class="value">
+                        {{ result.L if result.L is not none else "—" }}
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <label>Gap Between Beads</label>
+                    <div class="value">
+                        {{ result.G if result.G is not none else "—" }}
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <label>Run Length</label>
+                    <div class="value">
+                        {{ result.R if result.R is not none else "—" }}
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <label>Pitch (P)</label>
+                    <div class="value">
+                        {{ result.P if result.P is not none else "—" }}
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <label>Weld Coverage</label>
+                    <div class="value">
+                        {{ result.coverage if result.coverage is not none else "—" }}
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+
+                <div class="highlight-result">
+                    <label>Total Weld Material</label>
+                    <div class="value">
+                        {{ result.T if result.T is not none else "—" }}
+                        <span class="unit">mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZATION -->
+            {% if layout %}
+            <div class="visualization-section">
+                <h4>🎨 Visualization</h4>
+                <div class="weld-layout-container">
+                    <div class="weld-layout">
+                        {% for part in layout %}
+                            {% if part.type == "weld" %}
+                                <div class="weld" style="width: {{ (part.length * visualization_scale)|int }}px;" data-length="{{ part.length }}mm">
+                                </div>
+                            {% else %}
+                                <div class="gap" style="width: {{ (part.length * visualization_scale)|int }}px;" data-length="{{ part.length }}mm"></div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="scale-info">💡 Hover over beads and gaps to see actual lengths | Total Run Length: {{ result.R }}mm</div>
+            </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
+
 </div>
 
 </body>
